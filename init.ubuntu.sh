@@ -35,3 +35,9 @@ echo -** Run Ansible Init Play-book  **-
 echo -*********************************-
 
 ansible-playbook playbook.yml --ask-vault-pass
+
+echo -*********************************-
+echo -** Testing Github Connection   **-
+echo -*********************************-
+
+ssh -T git@github.com
