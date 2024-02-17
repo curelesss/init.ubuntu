@@ -28,7 +28,7 @@ echo -*********************************-
 echo -** Set current repo to ssh     **-
 echo -*********************************-
 
-git remote set-url origin git@github.com:curelesss/init.git
+git remote set-url origin git@github.com:curelesss/init.ubuntu.git
 
 echo -*********************************-
 echo -** Run Ansible Init Play-book  **-
