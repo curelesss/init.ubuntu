@@ -3,7 +3,7 @@ echo -** Update Ubuntu Mirror List   **-
 echo -*********************************-
 
 sudo rm -f /etc/apt/sources.list
-sudo cp ./mirrorlist/sources.list /etc/apt/
+sudo cp ./sources.list /etc/apt/
 
 echo -*********************************-
 echo -** Add Ansible Repository      **-
@@ -34,4 +34,4 @@ echo -*********************************-
 echo -** Run Ansible Init Play-book  **-
 echo -*********************************-
 
-ansible-playbook init.play-book.yml
+ansible-playbook playbook.yml --ask-vault-pass

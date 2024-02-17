@@ -1,0 +1,45 @@
+- name: Ubuntu Init Playbook
+  hosts: localhost
+  become: yes
+  vars:
+      source_key: "ssh/id_rsa"
+      dest_key: "{{ lookup('env', 'HOME') }}/.ssh/id_rsa"
+
+  tasks:
+
+    - name: git user.email
+      git_config:
+        name: user.email
+        scope: global
+        value: "curelesss@gmail.com"
+      tags:
+      - git
+
+    - name: git user.name
+      git_config:
+        name: user.name
+        scope: global
+        value: "curelesss"
+      tags:
+      - git
+
+    - name: Ensure .ssh directory exists.
+      file:
+        dest: "{{ dest_key | dirname }}"
+        mode: 0700
+        state: directory
+      tags:
+        - ssh
+
+    - name: Install ssh key 安装秘钥
+      copy:
+        src: "{{ source_key }}"
+        dest: "{{ dest_key }}"
+        mode: 0600
+      tags:
+        - ssh
+
+    - name: Install git config
+      ansible.builtin.command:
+        cmd: cp ssh/config "{{ lookup('env', 'HOME') }}/.ssh/"
+      tags: ssh
