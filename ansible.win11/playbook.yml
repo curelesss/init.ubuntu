@@ -1,0 +1,163 @@
+---
+- name: Windows 11 Desktop Setup Playbook
+  hosts: windows
+  become: false
+  gather_facts: false
+  vars:
+      source_key: "ssh/id_rsa"
+      dest_key: "{{ lookup('env', 'HOME') }}\\.dotfiles"
+      home: "C:\\Users\\fdong"
+        
+  tasks:
+
+    - name: test connection
+      ansible.windows.win_ping:
+
+    - name: Install 7zip
+      community.windows.win_scoop:
+        name: 7zip
+        state: present
+
+    - name: Install git
+      community.windows.win_scoop:
+        name: git
+        state: present
+
+    - name: Install Scoop Buckets
+      community.windows.win_scoop_bucket:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ buckets }}"
+      vars:
+        buckets:
+          - extras
+          - versions
+          - nerd-fonts
+          - sysinternals
+      tags:
+        - packages
+ 
+    - name: Install Fonts using Scoop
+      community.windows.win_scoop:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ fonts }}"
+      vars:
+        fonts:
+          - nerd-fonts/Mononoki-NF
+          - nerd-fonts/JetBrains-Mono
+          - nerd-fonts/SourceCodePro-NF         
+ 
+    - name: Install Languages using Scoop
+      community.windows.win_scoop:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ languages }}"
+      vars:
+        languages:
+          - versions/python310
+      tags:
+        - test7
+ 
+    - name: Install Packages using Scoop
+      community.windows.win_scoop:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ packages }}"
+      vars:
+        packages:
+          - extras/emacs
+          - vim
+          - neovim
+          - extras/vscode
+          - extras/notepadplusplus
+          - fd
+          - ripgrep
+          - sysinternals/psexec
+          - extras/vlc
+      tags:
+        - packages
+ 
+    - name: Install Browser using Scoop
+      community.windows.win_scoop:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ packages }}"
+      vars:
+        packages:
+          - extras/firefox
+          - extras/vivaldi
+          - extras/brave
+          - extras/thorium
+      tags:
+        - packages
+ 
+    - name: Install Windows11 Patchess using Scoop
+      community.windows.win_scoop:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ packages }}"
+      vars:
+        packages:
+          - extras/vcredist2022
+          - versions/windowsdesktop-runtime-6.0
+      tags:
+        - packages
+      
+    - name: Test PsExec connection to local Windows 11 host
+      community.windows.win_psexec:
+        command: whoami.exe
+
+    - name: Create .config folder
+      win_file:
+        path: "~\\.config1"
+        state: directory
+      tags:
+        - test
+
+    - name: Change power plan to high performance
+      community.windows.win_power_plan:
+        name: 高性能
+      tags:
+        - system
+
+    - name: Check .dotfiles directory
+      ansible.windows.win_stat:
+        path: "{{ home }}\\.dotfiles"
+      register: dotfiles_folder
+      tags:
+        - test2
+
+    - name: clone repositories
+      raw: '{{ home }}\\scoop\\apps\\git\\current\\bin\\git.exe clone git@github.com:curelesss/.dotfiles.git {{ home }}\\.dotfiles'
+      when: dotfiles_folder.stat.exists == False
+      tags:
+        - test2
+
+    - name: Check .emacs.d directory
+      ansible.windows.win_stat:
+        path: "{{ home }}\\.emacs.d"
+      register: emacs_folder
+      tags:
+        - test8
+
+    - name: clone .emacs.d repositories
+      raw: '{{ home }}\\scoop\\apps\\git\\current\\bin\\git.exe clone git@github.com:curelesss/.emacs.d.git {{ home }}\\.emacs.d'
+      when: emacs_folder.stat.exists == False
+      tags:
+        - test8
+
+    - name: Set $HOME environment variable for all users
+      ansible.windows.win_environment:
+        state: present
+        name: HOME
+        value: "{{ home }}"
+        level: user
+      tags:
+        - test3
+
+    - name: Install Neovim Configuration
+      community.windows.win_psexec:
+        command: emacs --batch --eval "(setq coding-system-for-read 'utf-8)" --eval "(setq coding-system-for-write 'utf-8)" -l org C:\Users\fdong\.dotfiles\nvim\neovim.org -f org-babel-tangle
+      tags:
+        - test5
