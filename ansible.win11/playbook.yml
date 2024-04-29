@@ -161,3 +161,22 @@
         command: emacs --batch --eval "(setq coding-system-for-read 'utf-8)" --eval "(setq coding-system-for-write 'utf-8)" -l org C:\Users\fdong\.dotfiles\nvim\neovim.org -f org-babel-tangle
       tags:
         - test5
+      
+    - name: Setting Git Name
+      community.windows.win_psexec:
+        command: git config --global user.name "curelesss"
+      tags:
+        - test10
+      
+    - name: Setting Git Email
+      community.windows.win_psexec:
+        command: git config --global user.email "curelesss@gmail.com"
+      tags:
+        - test10
+          
+    - name: Uninstall built-in apps
+      win_shell: |
+        Get-AppxPackage *地图* | Remove-AppxPackage
+        $true
+      tags:
+        - test11
